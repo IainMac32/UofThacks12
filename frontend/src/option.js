@@ -7,12 +7,12 @@ function App(){
     const location = useLocation();
     const title = location.state?.title || "Default Title";
     const [text, setText] = useState("");
-
+    const navigate = useNavigate();
     const handleChange = (event) => {
         setText(event.target.value);
       };
     const handleClick = () => {
-        //Redirect to slide page or loading page while generate
+        navigate("/slideshow");
       }
     return(
         <div className='option-page'>
@@ -23,6 +23,7 @@ function App(){
                 <h3>What would you like to know about {title}?</h3>
             </div>
             <div>
+            <div className="input-container">
                 <input
                     type="text"
                     className="textbox"
@@ -30,12 +31,13 @@ function App(){
                     onChange={handleChange} 
                     placeholder="Type your question..."
                 />
-                <button className="icon-button"
+                <button className={`continue-but ${text ? "active" : "disabled"}`}
                 onClick={handleClick}
                 disabled={!text} 
                 >
                     <FaCircleArrowRight />
                 </button>
+            </div>
             </div>
         </div>
     );
