@@ -101,7 +101,8 @@ def get_perspectives(topic):
     dict["names"] = names
     dict["descs"] = descs
     dict["images"] = images_url
-    print(dict)
+    
+    return dict
 
 
 # get_perspectives("Barack Obama")
@@ -128,7 +129,7 @@ def get_chatbot(user_question,user_topic,past_response):
     response_text = chat_completion.choices[0].message.content
     return response_text
 
-
-q = "how was Obama's sleep schedule?"
-past = "From my perspective as Barack's Vice President, I saw a man of deep intellect and integrity who had a clear vision for the nation. Working closely with him, I witnessed his thoughtful decision-making and relentless pursuit of policies that aimed to uplift every American, even when facing staunch opposition."
-print(get_chatbot(q,"Joe Biden",past))
+######## TESTING ####################
+#q = "how was Obama's sleep schedule?"
+#past = "From my perspective as Barack's Vice President, I saw a man of deep intellect and integrity who had a clear vision for the nation. Working closely with him, I witnessed his thoughtful decision-making and relentless pursuit of policies that aimed to uplift every American, even when facing staunch opposition."
+#print(get_chatbot(q,"Joe Biden",past))
