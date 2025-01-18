@@ -1,0 +1,52 @@
+.option-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.option-title {
+    flex: 1;
+    padding-top: 10px;
+    padding-bottom: 0px;
+    font-size: 30px;
+  }
+
+.option-question{
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 25px;
+}
+
+.textbox{
+    flex:8;
+    padding: 0 50px 0 20px;
+    width: 600px;;
+    height: 40px;
+    border: 2px solid black;
+    color:black;
+    border-radius: 20px;
+    font-size: 20px;
+}
+
+.textbox:focus{
+    background-color: rgb(243, 243, 243);
+    border: 3px solid black;
+    box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+}
+
+.question-row{
+    display:flex;
+    flex-direction: row;
+}
+
+.continue-but{
+    position:absolute;
+}
+
+.continue-but.disabled {
+    color: grey; /* Grey icon when disabled */
+    opacity: 0.5; /* Reduced opacity */
+    cursor: not-allowed; /* Show "not allowed" cursor */
+  }
+
