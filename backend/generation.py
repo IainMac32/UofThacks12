@@ -3,6 +3,7 @@ from openai import OpenAI
 import re
 from dotenv import load_dotenv
 import requests
+import textwrap
 
 
 def get_perspectives(topic):
@@ -40,11 +41,6 @@ def get_perspectives(topic):
         print(chat_response)
     else:
         print("Failed to get a response.")
-
-
-
-
-
 
     #get names list -------------------------
     names_unfiltered = re.findall(r"\*\*(.*?)\*\*", chat_response)
@@ -105,9 +101,6 @@ def get_perspectives(topic):
     return dict
 
 
-
-
-
 def get_chatbot(user_question,user_topic,past_response):
     load_dotenv()
     ai_key = os.getenv('AIKEY')
@@ -128,3 +121,56 @@ def get_chatbot(user_question,user_topic,past_response):
     response_text = chat_completion.choices[0].message.content
     return response_text
 
+
+def convert_chat_logs(chat_logs, title):
+
+    # Step 1: Format the dialogue
+    formatted_dialogue = f"Below is a conversation between a user and **{title}**, speaking from their own perspective:\n\n"
+    for i, log in enumerate(chat_logs):
+        if i % 2 == 0:
+            # Even-indexed entries are from the entity
+            formatted_dialogue += f"**{title}**: {log}\n"
+        else:
+            # Odd-indexed entries are from the user
+            formatted_dialogue += f"**User**: {log}\n"
+
+    print(formatted_dialogue)
+
+    # Step 2: Craft the GPT prompt
+    prompt = (
+        f"You are **{title}**, and you just finished a conversation with a user where "
+        f"you shared insights about yourself, your experiences, and your perspective. "
+        f"Retell the key points you shared as if you were speaking directly to the user again, "
+        f"in a first-person narrative. Focus only on what **you** said, and write it as if "
+        f"you were explaining your story or perspective to the user.\n\n"
+        f"Here is the conversation for context:\n\n{formatted_dialogue}\n\n"
+        f"Now, please write the story or explanation again from your perspective in the first person."
+    )
+
+    # Step 3: Call GPT to generate the summary
+    load_dotenv()
+    ai_key = os.getenv('AIKEY')
+    if not ai_key:
+        raise ValueError("AIKEY is not set in the environment.")
+
+    client = OpenAI(api_key=ai_key)
+
+    try:
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt},
+            ],
+            model="gpt-4o",
+        )
+    except Exception as e:
+        raise RuntimeError(f"Failed to call OpenAI API: {str(e)}")
+
+    # Extract the summary from the response
+    response_text = chat_completion.choices[0].message.content.strip()
+    print(response_text)
+    return response_text
+
+######### TESTING #############
+#logs = ["Hello I am George washington's wife and I like to be supportive to george because I admire him", "Thats really interesting, what does he like to eat?", "Oh he loves soup"]
+#convert_chat_logs(logs, "g washington's wife")

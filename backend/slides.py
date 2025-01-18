@@ -254,3 +254,6 @@ def create_slideshow(json,topic):
         "descs": [";laskdj;lkasdjf;lkasdjfl;askdjf","Slides about George. Slides about George. Slides about George. Slides about George. Slides about George. Slides about George. "]
     }
     handleData(json,presentation_id)
+
+    presentation_link = f"https://docs.google.com/presentation/d/{presentation_id}/edit"
+    return presentation_link

@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 
 from generation import * 
+from slides import *
 
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:5173"])
@@ -48,24 +49,26 @@ def chatbot_route():
 
 
 @app.route("/api/exportSlides", methods=["POST"])
-def chatbot_route():
+def export_route():
     # 1. Get all titles, images, and the chat log for each
     data = request.json
     titles = data.get("titles")
-    images = data.get("images")
     chat_logs = data.get("chat_logs")
+    topic = data.get("topic")
+    # note there is also data.get("images") but we don't need to use it just yet
 
     # 2. Convert the chat log to a slide description
-    #descriptions = convert_chat_logs(chat_logs)
-    desriptions = chat_logs # temp fix
+    descriptions = [] # convert each chat log to a description
+    for i in range(len(titles)):
+        descriptions.append(convert_chat_logs(chat_logs[i], titles[i]))
 
     data["descs"] = descriptions
 
     # 3. Send the title, images, and descriptions to slides.property
-    #link = handleData(json)
+    link = create_slideshow(data, topic)
 
     # 4. return the link ig
-    #return jsonify({"slides_link": link})
+    return jsonify({"slides_link": link})
 
 if __name__ == '__main__':
     app.run(debug=True)
