@@ -15,7 +15,7 @@ def get_perspectives(topic):
     # --------------------------------------------------
     UserTopic = topic
 
-    prompt = "What are 3 people or events that are associated with " + UserTopic + " describe " + UserTopic + " from the perspective (first person) of those people or events. Can you put stars around the person / event name (example: **PersonName**) and ## around the descriptions and no other special characters anywhere"
+    prompt = "What are 3 people or events that are associated with " + UserTopic + " describe " + UserTopic + " from the perspective (first person) of those people or events. First have " + UserTopic + " describe themselves from their own perspective. Can you put stars around the person / event name (example: **PersonName**) and ## around the descriptions (##description##) and no other special characters anywhere"
 
 
     # GPT response --------------------------------------------------
@@ -104,4 +104,31 @@ def get_perspectives(topic):
     print(dict)
 
 
-get_perspectives("Cleopatra")
+# get_perspectives("Barack Obama")
+
+
+
+def get_chatbot(user_question,user_topic,past_response):
+    load_dotenv()
+    ai_key = os.getenv('AIKEY')
+    client = OpenAI(api_key=ai_key)
+
+    # GPT response --------------------------------------------------
+    chat_completion = client.chat.completions.create(
+        messages=[
+            {"role": "system", "content": f"You are {user_topic}. SPEAK IN FIRST PERSON from the knowledge and perspective of you!"},
+            {"role": "assistant", "content": past_response},
+            {"role": "user", "content": user_question},
+        ],
+        model="gpt-4o",
+    )
+
+
+    # Get the response from the API
+    response_text = chat_completion.choices[0].message.content
+    return response_text
+
+
+q = "how was Obama's sleep schedule?"
+past = "From my perspective as Barack's Vice President, I saw a man of deep intellect and integrity who had a clear vision for the nation. Working closely with him, I witnessed his thoughtful decision-making and relentless pursuit of policies that aimed to uplift every American, even when facing staunch opposition."
+print(get_chatbot(q,"Joe Biden",past))
