@@ -101,7 +101,8 @@ def get_perspectives(topic):
     dict["names"] = names
     dict["descs"] = descs
     dict["images"] = images_url
-    print(dict)
+    
+    return dict
 
 
 

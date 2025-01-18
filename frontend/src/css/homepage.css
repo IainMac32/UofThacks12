@@ -1,0 +1,60 @@
+
+.app-background{
+    background-color: antiquewhite;
+    min-height: 100vh;
+  }
+  
+  .app {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  
+  }
+  .title {
+    flex: 1;
+    padding-top: 10px;
+    padding-bottom: 0px;
+    font-size: 30px;
+  }
+  
+  .slogan{
+    flex: 1;
+    font-style: italic;
+    padding-bottom: 20px;
+  }
+  
+  .grid-container{
+    display: flex;
+    flex-direction: column;
+    width: 400px;
+    height: 400px;;
+    gap:10px;
+  }
+  .row{
+    display: flex;
+    flex-direction: row;
+    gap:10px;
+  }
+  .square{
+    flex:1;
+    background-color: rgb(166, 247, 84);
+    border: 1px black;
+    padding:5px;
+    height: 100px;
+    width: 200px;
+    box-sizing: border-box;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .square:hover{
+    background-color: aqua;
+    transform: scale(1.1);
+  }
+  
+  .grid-container p{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
