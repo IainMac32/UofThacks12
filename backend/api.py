@@ -27,6 +27,7 @@ def submit_perspectives():
     
     return jsonify(perspectives_dict)
 
+
 @app.route("/api/chatbot", methods=["POST"])
 def chatbot_route():
     data = request.json
@@ -44,6 +45,27 @@ def chatbot_route():
 
     # Return the chatbot response
     return jsonify({"response": response})
+
+
+@app.route("/api/exportSlides", methods=["POST"])
+def chatbot_route():
+    # 1. Get all titles, images, and the chat log for each
+    data = request.json
+    titles = data.get("titles")
+    images = data.get("images")
+    chat_logs = data.get("chat_logs")
+
+    # 2. Convert the chat log to a slide description
+    #descriptions = convert_chat_logs(chat_logs)
+    desriptions = chat_logs # temp fix
+
+    data["descs"] = descriptions
+
+    # 3. Send the title, images, and descriptions to slides.property
+    #link = handleData(json)
+
+    # 4. return the link ig
+    #return jsonify({"slides_link": link})
 
 if __name__ == '__main__':
     app.run(debug=True)
