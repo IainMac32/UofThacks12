@@ -2,6 +2,8 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 import uuid
 import webbrowser
+from pyspark.sql import SparkSession
+
 
 # Path to your service account key file
 SERVICE_ACCOUNT_FILE = "./credentials.json"
@@ -16,7 +18,9 @@ credentials = service_account.Credentials.from_service_account_file(
 slides_service = build("slides", "v1", credentials=credentials)
 drive_service = build("drive", "v3", credentials=credentials)
 
-def initializePresentation(title):
+
+
+def initializePresentation(title,topic,user_topic):
     # Create a new blank presentation
     presentation = slides_service.presentations().create(body={"title": title}).execute()
 
@@ -24,6 +28,48 @@ def initializePresentation(title):
     presentation_id = presentation.get("presentationId")
     print(f"Created presentation with ID: {presentation_id}")
     print(f"View it at: https://docs.google.com/presentation/d/{presentation_id}/edit")
+
+    # data base upload --------------------------------------------------
+    spark = SparkSession.builder.appName("UserManagement").getOrCreate()
+
+    # Create table (if not exists)
+    spark.sql("""
+        CREATE DATABASE IF NOT EXISTS user_management;
+    """)
+
+    spark.sql("""
+        CREATE TABLE IF NOT EXISTS user_management.users (
+            id BIGINT GENERATED ALWAYS AS IDENTITY,
+            username STRING NOT NULL,
+            email STRING NOT NULL
+        ) USING DELTA;
+    """)
+
+    # Data to insert
+    new_users = [
+        {"username": "johndoe", "email": "johndoe@example.com"},
+        {"username": "janedoe", "email": "janedoe@example.com"},
+    ]
+
+    # Convert to DataFrame
+    users_df = spark.createDataFrame(new_users)
+
+    # Write to Delta table
+    users_df.write.format("delta").mode("append").saveAsTable("user_management.users")
+
+
+    # Read data into DataFrame
+    users_df = spark.table("user_management.users")
+
+    # Show data
+    users_df.show()
+
+    # Filter DataFrame
+    filtered_df = users_df.filter(users_df.username == "johndoe")
+    filtered_df.show()
+
+
+
 
     # Make the presentation public to any viewer
     drive_service.permissions().create(
@@ -36,7 +82,7 @@ def initializePresentation(title):
 
     return presentation_id
 
-def addContentToSlide(presentation_id, title, image_url, description):
+def addContentToSlide(presentation_id, title, image_url, description,topic):
     # Create a new blank slide
     requests = [
         {
@@ -74,7 +120,7 @@ def addContentToSlide(presentation_id, title, image_url, description):
                     "pageObjectId": slide_id,
                     "size": {
                         "height": {"magnitude": 60, "unit": "PT"},
-                        "width": {"magnitude": 480, "unit": "PT"}
+                        "width": {"magnitude": 470, "unit": "PT"}
                     },
                     "transform": {
                         "scaleX": 1,  # Horizontal scale (1 = normal)
@@ -121,13 +167,13 @@ def addContentToSlide(presentation_id, title, image_url, description):
                 "elementProperties": {
                     "pageObjectId": slide_id,
                     "size": {
-                        "height": {"magnitude": 250, "unit": "PT"},
-                        "width": {"magnitude": 350, "unit": "PT"}
+                        "height": {"magnitude": 280, "unit": "PT"},
+                        "width": {"magnitude": 370, "unit": "PT"}
                     }, #350,450,125,50
                     "transform": {
                         "scaleX": 1,
                         "scaleY": 1,
-                        "translateX": 420,
+                        "translateX": 400,
                         "translateY": 20,
                         "unit": "PT"
                     },
@@ -151,7 +197,7 @@ def addContentToSlide(presentation_id, title, image_url, description):
                     "pageObjectId": slide_id,
                     "size": {
                         "height": {"magnitude": 400, "unit": "PT"},
-                        "width": {"magnitude": 480, "unit": "PT"}
+                        "width": {"magnitude": 470, "unit": "PT"}
                     },
                     "transform": {
                         "scaleX": 1,
@@ -193,6 +239,17 @@ def addContentToSlide(presentation_id, title, image_url, description):
         presentationId=presentation_id, body={"requests": requests}
     ).execute()
 
+
+
+
+    if topic == 1:
+        rgb = {"red": 0.94, "green": 0.87, "blue": 0.73} # History
+    elif topic == 2:
+        rgb = {"red": 0.53, "green": 0.81, "blue": 0.92} # animals
+    elif topic == 3:
+        rgb = {"red": 0.83, "green": 0.83, "blue": 0.83} # entertainment
+
+
     background_color_request = {
         "updatePageProperties": {
             "objectId": slide_id,
@@ -200,7 +257,7 @@ def addContentToSlide(presentation_id, title, image_url, description):
                 "pageBackgroundFill": {
                     "solidFill": {
                         "color": {
-                            "rgbColor": {"red": 0.94, "green": 0.87, "blue": 0.73}  # Light gray color
+                            "rgbColor": rgb 
                         }
                     }
                 }
@@ -219,7 +276,9 @@ def addContentToSlide(presentation_id, title, image_url, description):
 
 
 
-def handleData(data,presentation_id):
+
+
+def handleData(data,presentation_id,topic):
 
     # Extract data from the dictionary
     title = data.get("names")  # Default title if not provided
@@ -232,12 +291,14 @@ def handleData(data,presentation_id):
             presentation_id=presentation_id,
             title=title[i], 
             image_url=image[i], 
-            description=description[i]
+            description=description[i],
+            topic=topic
         )
 
 
+# this will be called in flask
 def create_slideshow(json,topic):
-    presentation_id = initializePresentation("UofTHacks")
+    presentation_id = initializePresentation("UofTHacks",topic,json["names"][0])
 
     # delete first slide
     credentials_file = 'credentials.json'
@@ -253,7 +314,4 @@ def create_slideshow(json,topic):
         "images": ["https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Gilbert_Stuart_Williamstown_Portrait_of_George_Washington.jpg/1200px-Gilbert_Stuart_Williamstown_Portrait_of_George_Washington.jpg","https://www.varsitytutors.com/images/earlyamerica/washington.jpg"],
         "descs": [";laskdj;lkasdjf;lkasdjfl;askdjf","Slides about George. Slides about George. Slides about George. Slides about George. Slides about George. Slides about George. "]
     }
-    handleData(json,presentation_id)
-
-    presentation_link = f"https://docs.google.com/presentation/d/{presentation_id}/edit"
-    return presentation_link
+    handleData(json,presentation_id,topic)
