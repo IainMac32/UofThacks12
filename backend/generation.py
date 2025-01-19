@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import requests
 
 
+# flask for different pov creation of 4 people and images (creates a dictionary)
 def get_perspectives(topic):
     # load api key
     load_dotenv()
@@ -40,9 +41,6 @@ def get_perspectives(topic):
         print(chat_response)
     else:
         print("Failed to get a response.")
-
-
-
 
 
 
@@ -108,6 +106,7 @@ def get_perspectives(topic):
 
 
 
+# in flask for talking to person
 def get_chatbot(user_question,user_topic,past_response):
     load_dotenv()
     ai_key = os.getenv('AIKEY')
