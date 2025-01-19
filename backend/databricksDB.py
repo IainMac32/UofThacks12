@@ -2,7 +2,7 @@ from pyspark.sql import SparkSession
 from delta import configure_spark_with_delta_pip
 
 
-def upload_to_db(main_topic,user_topic,slide_link):
+def upload_to_db(main_topic,slide_link):
     # Step 1: Initialize SparkSession with Delta support
     builder = SparkSession.builder \
         .appName("DeltaLakeExample") \
@@ -12,7 +12,7 @@ def upload_to_db(main_topic,user_topic,slide_link):
     spark = configure_spark_with_delta_pip(builder).getOrCreate()
 
     # Step 2: Create a DataFrame and save it as a Delta table
-    data = [{"main_topic": main_topic, 'user_topic': user_topic, 'slide_link': slide_link}]
+    data = [{"user_topic": main_topic, 'slide_link': slide_link}]
     df = spark.createDataFrame(data)
 
     df.write.format("delta").mode("append").save("delta-table")

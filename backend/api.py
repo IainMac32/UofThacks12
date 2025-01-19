@@ -4,13 +4,11 @@ import os
 
 from generation import * 
 from slides import *
+from databricksDB import *
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-import logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
 
 
 # GLOBAL VARIABLES
@@ -57,19 +55,54 @@ def chatbot_route():
     return jsonify({"response": response})
 
 
+import time
+
 @app.route("/api/exportSlides", methods=["POST"])
 def export_route():
     print("THIS IS CALLED")
     # 1. Get all titles, images, and the chat log for each
     data = request.json
 
+    max_retries = 4
+    attempt = 0
+    link = None
 
-    # 3. Send the title, images, and descriptions to slides.property
-    link = create_slideshow(data)
+    # Retry loop to create slideshow link
+    while attempt < max_retries:
+        try:
+            # 3. Send the title, images, and descriptions to slides.property
+            link = create_slideshow(data)
+            break  # Break the loop if successful
+        except Exception as e:
+            attempt += 1
+            print(f"Error creating slideshow: {e}. Retrying {attempt}/{max_retries}...")
+            time.sleep(2)  # Wait 2 seconds before retrying
+
+    if link is None:
+        return jsonify({"error": "Failed to create slideshow after multiple attempts"}), 500
+
+    # 4. Upload the link to the database
+    names = data.get("names")[0]
+    upload_to_db(names, link)
+
+    # Return the link
+    return jsonify({"slides_link": link})
+
+
+@app.route("/api/retrieve_db", methods=["POST"])
+def export_db_route():
+    print("THIS IS CALLED")
+    # 1. Get all titles, images, and the chat log for each
+    
 
     # 4. return the link ig
-    return jsonify({"slides_link": link})
+    return jsonify(retrieve_from_db())
+
+
+
+
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8030))  # Default to 8080
     app.run(debug=True, host='0.0.0.0', port=port)
+
