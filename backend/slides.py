@@ -1,9 +1,9 @@
+import random
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 import uuid
 import webbrowser
 from pyspark.sql import SparkSession
-
 
 # Path to your service account key file
 SERVICE_ACCOUNT_FILE = "./credentials.json"
@@ -19,8 +19,7 @@ slides_service = build("slides", "v1", credentials=credentials)
 drive_service = build("drive", "v3", credentials=credentials)
 
 
-
-def initializePresentation(title,topic):
+def initializePresentation(title):
     # Create a new blank presentation
     presentation = slides_service.presentations().create(body={"title": title}).execute()
 
@@ -28,10 +27,6 @@ def initializePresentation(title,topic):
     presentation_id = presentation.get("presentationId")
     print(f"Created presentation with ID: {presentation_id}")
     print(f"View it at: https://docs.google.com/presentation/d/{presentation_id}/edit")
-
-
-
-
 
     # Make the presentation public to any viewer
     drive_service.permissions().create(
@@ -44,7 +39,8 @@ def initializePresentation(title,topic):
 
     return presentation_id
 
-def addContentToSlide(presentation_id, title, image_url, description,topic):
+
+def addContentToSlide(presentation_id, title, image_url, description, topic):
     # Create a new blank slide
     requests = [
         {
@@ -54,22 +50,21 @@ def addContentToSlide(presentation_id, title, image_url, description,topic):
         }
     ]
 
-
-
     response = slides_service.presentations().batchUpdate(
         presentationId=presentation_id, body={"requests": requests}
     ).execute()
-    
-    # Get the slide ID of the newly created slide
-    slide_id = response['replies'][0]['createSlide']['objectId']
+
+    # Check if the slide creation was successful
+    if 'replies' in response and len(response['replies']) > 0:
+        slide_id = response['replies'][0]['createSlide']['objectId']
+    else:
+        print("Error: Slide creation failed")
+        return
 
     # Define element IDs for title, image, and description
     title_id = f"title_{str(uuid.uuid4())}"
     image_id = f"image_{str(uuid.uuid4())}"
     description_id = f"description_{str(uuid.uuid4())}"
-
-    element_id = f"MyTextBox_{str(uuid.uuid4())}"  # Use uuid to generate a unique ID
-
 
     # Add the title, image, and description to the slide
     requests = [
@@ -118,9 +113,6 @@ def addContentToSlide(presentation_id, title, image_url, description,topic):
             }
         },
 
-
-
-
         # Add image
         {
             "createImage": {
@@ -131,7 +123,7 @@ def addContentToSlide(presentation_id, title, image_url, description,topic):
                     "size": {
                         "height": {"magnitude": 280, "unit": "PT"},
                         "width": {"magnitude": 320, "unit": "PT"}
-                    }, #350,450,125,50
+                    },
                     "transform": {
                         "scaleX": 1,
                         "scaleY": 1,
@@ -142,13 +134,6 @@ def addContentToSlide(presentation_id, title, image_url, description,topic):
                 },
             }
         },
-
-
-
-
-
-
-
 
         # Add description text box
         {
@@ -201,16 +186,13 @@ def addContentToSlide(presentation_id, title, image_url, description,topic):
         presentationId=presentation_id, body={"requests": requests}
     ).execute()
 
-
-
-
+    # Set background color based on the topic
     if topic == 1:
-        rgb = {"red": 0.94, "green": 0.87, "blue": 0.73} # History
+        rgb = {"red": 0.94, "green": 0.87, "blue": 0.73}  # History
     elif topic == 2:
-        rgb = {"red": 0.53, "green": 0.81, "blue": 0.92} # animals
+        rgb = {"red": 0.53, "green": 0.81, "blue": 0.92}  # Animals
     elif topic == 3:
-        rgb = {"red": 0.83, "green": 0.83, "blue": 0.83} # entertainment
-
+        rgb = {"red": 0.83, "green": 0.83, "blue": 0.83}  # Entertainment
 
     background_color_request = {
         "updatePageProperties": {
@@ -219,7 +201,7 @@ def addContentToSlide(presentation_id, title, image_url, description,topic):
                 "pageBackgroundFill": {
                     "solidFill": {
                         "color": {
-                            "rgbColor": rgb 
+                            "rgbColor": rgb
                         }
                     }
                 }
@@ -233,15 +215,7 @@ def addContentToSlide(presentation_id, title, image_url, description,topic):
     ).execute()
 
 
-
-
-
-
-
-
-
-def handleData(data,presentation_id,topic):
-
+def handleData(data, presentation_id, topic):
     # Extract data from the dictionary
     title = data.get("names")  # Default title if not provided
     image = data.get("images")  # Default to empty string if no image is provided
@@ -259,18 +233,20 @@ def handleData(data,presentation_id,topic):
 
 
 # this will be called in flask
-def create_slideshow(json,topic=1):
-    presentation_id = initializePresentation("UofTHacks",json["names"][0])
+def create_slideshow(json, topic=1):
+    randomnum = random.randint(1, 1000)
+    presentation_id = initializePresentation("UofTHacks" + str(randomnum))
 
-    # delete first slide
+    # Delete first slide dynamically
     credentials_file = 'credentials.json'
     creds = service_account.Credentials.from_service_account_file(credentials_file)
     service = build("slides", "v1", credentials=creds)
-    requests = [{"deleteObject": {"objectId": "p",}}]
+    presentation = service.presentations().get(presentationId=presentation_id).execute()
+    first_slide_id = presentation.get("slides")[0]["objectId"]
+
+    requests = [{"deleteObject": {"objectId": first_slide_id}}]
     body = {"requests": requests}
-    response = (service.presentations().batchUpdate(presentationId=presentation_id, body=body).execute())
+    response = service.presentations().batchUpdate(presentationId=presentation_id, body=body).execute()
 
-
-    
-    handleData(json,presentation_id,topic)
+    handleData(json, presentation_id, topic)
     return f'https://docs.google.com/presentation/d/{presentation_id}/edit'
