@@ -77,3 +77,38 @@
     background-color: #0056b3;
   }
   
+  .similar-results-label{
+    display: flex;
+    justify-content: center;
+    font-size: 30px;
+    padding-top: 20px;
+    font-weight: 600;
+  }
+
+  .similar-results-table {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+  }
+  
+  .table-row {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .table-row p {
+    margin-right: 10px;
+    font-weight: bold;
+  }
+  
+  .question-link {
+    color: #007bff;
+    text-decoration: none;
+  }
+  
+  .question-link:hover {
+    text-decoration: underline;
+  }
