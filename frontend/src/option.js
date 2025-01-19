@@ -11,8 +11,8 @@ function App(){
     const handleChange = (event) => {
         setText(event.target.value);
       };
-    const handleClick = () => {
-        navigate("/slideshow");
+    const handleClick = (textInput) => {
+        navigate("/slideshow", { state: { query: textInput } });
       }
     //Use API to replace this data
     const data=[
@@ -41,7 +41,7 @@ function App(){
                     placeholder="Type your question..."
                 />
                 <button className={`continue-but ${text ? "active" : "disabled"}`}
-                onClick={handleClick}
+                onClick={() => handleClick(text)} 
                 disabled={!text} 
                 >
                 <FaCircleArrowRight />
