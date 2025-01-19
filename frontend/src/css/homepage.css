@@ -1,61 +1,87 @@
+.app-background {
+  background-color: antiquewhite;
+  min-height: 100vh;
+}
 
-.app-background{
-    background-color: antiquewhite;
-    min-height: 100vh;
-  }
-  
-  .app {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  
-  }
-  .title {
-    flex: 1;
-    padding-top: 10px;
-    padding-bottom: 0px;
-    font-size: 30px;
-  }
-  
-  .slogan{
-    flex: 1;
-    font-style: italic;
-    padding-bottom: 20px;
-  }
-  
-  .grid-container{
-    display: flex;
-    flex-direction: column;
-    width: 600px;
-    height: 600px;;
-    gap:10px;
-  }
-  .row{
-    display: flex;
-    flex-direction: row;
-    gap:10px;
-  }
-  .square{
-    flex:1;
-    background-color: rgb(166, 247, 84);
-    border: 1px black;
-    padding:5px;
-    height: 150px;
-    width: 200px;
-    box-sizing: border-box;
-    transition: transform 0.3s ease;
-    cursor: pointer;
-  }
-  
-  .square:hover{
-    background-color: aqua;
-    transform: scale(1.1);
-  }
-  
-  .grid-container p{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 26px;
-  }
+.background-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  transition: opacity 0.5s ease-in-out; 
+  z-index: -1;
+  opacity: 0;
+}
+
+.background-overlay.visible {
+  opacity: 1; 
+}
+.app {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.title {
+  flex: 1;
+  padding-top: 10px;
+  padding-bottom: 0px;
+  font-size: 30px;
+}
+
+.slogan {
+  flex: 1;
+  font-style: italic;
+  padding-bottom: 20px;
+  font-size: 25px;
+  font-weight: 500;
+}
+
+.grid-container {
+  display: flex;
+  flex-direction: column;
+  width: 600px;
+  height: 600px;
+  gap: 10px;
+}
+.row {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+.square {
+  flex: 1;
+  background-color: rgb(166, 247, 84);
+  border: 1px black;
+  padding: 10px;
+  height: 250px;
+  width: 300px;
+  box-sizing: border-box;
+  transition: transform 0.3s ease, background-image 1s ease;
+  cursor: pointer;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.square:hover {
+  transform: scale(1.05);
+}
+
+.grid-container p {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+}
+
+.grid-container p {
+  font-size: 26px;
+  color: #fff;
+  text-shadow: 1px 1px 2px #000;
+}
