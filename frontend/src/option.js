@@ -19,32 +19,38 @@ function App(){
 
 
 
-    const handleClick = (textInput) => {
+      const handleClick = (textInput) => {
         const payload = { topic: textInput }; // Create the payload
-
-        fetch('https://flask-app-i7sgeivnqa-uc.a.run.app/api/getPerspectives', {
+    
+        // First fetch request to get data
+        fetch('http://127.0.0.1:8030/api/getPerspectives', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(payload),
         })
-            .then((response) => {
+                    .then((response) => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 return response.json();
             })
-            .then((data) => {
-                console.log('Success:', data);
+            .then((data2) => {
+                console.log('Success:', data2);
+                
                 // Use the response data to navigate or update your UI
-                navigate("/slideshow", { state: { response: data } });
+                navigate("/slideshow", { state: { response: data2 } });
+    
+                console.log("slides is called")
+                console.log(data2)
+                // Now, make the second fetch request to export slides
             })
             .catch((error) => {
-                console.error('Error:', error);
+                console.error('Error in getPerspectives request:', error);
             });
     };
-
+    
 
 
 

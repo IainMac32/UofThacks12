@@ -8,6 +8,11 @@ from slides import *
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+
 # GLOBAL VARIABLES
 
 
@@ -20,7 +25,6 @@ def basic_authentication():
 
 @app.route("/api/getPerspectives", methods=['POST', 'GET', 'OPTIONS'])
 def submit_perspectives():
-
     topic = request.json.get('topic')
     print(topic)
 
@@ -28,6 +32,10 @@ def submit_perspectives():
     perspectives_dict = get_perspectives(topic)
     
     return jsonify(perspectives_dict)
+
+
+
+
 
 
 @app.route("/api/chatbot", methods=["POST"])
@@ -51,26 +59,17 @@ def chatbot_route():
 
 @app.route("/api/exportSlides", methods=["POST"])
 def export_route():
+    print("THIS IS CALLED")
     # 1. Get all titles, images, and the chat log for each
     data = request.json
-    titles = data.get("titles")
-    chat_logs = data.get("chat_logs")
-    topic = data.get("topic")
-    # note there is also data.get("images") but we don't need to use it just yet
 
-    # 2. Convert the chat log to a slide description
-    descriptions = [] # convert each chat log to a description
-    for i in range(len(titles)):
-        descriptions.append(convert_chat_logs(chat_logs[i], titles[i]))
-
-    data["descs"] = descriptions
 
     # 3. Send the title, images, and descriptions to slides.property
-    link = create_slideshow(data, topic)
+    link = create_slideshow(data)
 
     # 4. return the link ig
     return jsonify({"slides_link": link})
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 8080))  # Default to 8080
+    port = int(os.environ.get("PORT", 8030))  # Default to 8080
     app.run(debug=True, host='0.0.0.0', port=port)

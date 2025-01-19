@@ -20,7 +20,7 @@ drive_service = build("drive", "v3", credentials=credentials)
 
 
 
-def initializePresentation(title,topic,user_topic):
+def initializePresentation(title,topic):
     # Create a new blank presentation
     presentation = slides_service.presentations().create(body={"title": title}).execute()
 
@@ -29,44 +29,6 @@ def initializePresentation(title,topic,user_topic):
     print(f"Created presentation with ID: {presentation_id}")
     print(f"View it at: https://docs.google.com/presentation/d/{presentation_id}/edit")
 
-    # data base upload --------------------------------------------------
-    spark = SparkSession.builder.appName("UserManagement").getOrCreate()
-
-    # Create table (if not exists)
-    spark.sql("""
-        CREATE DATABASE IF NOT EXISTS user_management;
-    """)
-
-    spark.sql("""
-        CREATE TABLE IF NOT EXISTS user_management.users (
-            id BIGINT GENERATED ALWAYS AS IDENTITY,
-            username STRING NOT NULL,
-            email STRING NOT NULL
-        ) USING DELTA;
-    """)
-
-    # Data to insert
-    new_users = [
-        {"username": "johndoe", "email": "johndoe@example.com"},
-        {"username": "janedoe", "email": "janedoe@example.com"},
-    ]
-
-    # Convert to DataFrame
-    users_df = spark.createDataFrame(new_users)
-
-    # Write to Delta table
-    users_df.write.format("delta").mode("append").saveAsTable("user_management.users")
-
-
-    # Read data into DataFrame
-    users_df = spark.table("user_management.users")
-
-    # Show data
-    users_df.show()
-
-    # Filter DataFrame
-    filtered_df = users_df.filter(users_df.username == "johndoe")
-    filtered_df.show()
 
 
 
@@ -168,7 +130,7 @@ def addContentToSlide(presentation_id, title, image_url, description,topic):
                     "pageObjectId": slide_id,
                     "size": {
                         "height": {"magnitude": 280, "unit": "PT"},
-                        "width": {"magnitude": 370, "unit": "PT"}
+                        "width": {"magnitude": 320, "unit": "PT"}
                     }, #350,450,125,50
                     "transform": {
                         "scaleX": 1,
@@ -297,8 +259,8 @@ def handleData(data,presentation_id,topic):
 
 
 # this will be called in flask
-def create_slideshow(json,topic):
-    presentation_id = initializePresentation("UofTHacks",topic,json["names"][0])
+def create_slideshow(json,topic=1):
+    presentation_id = initializePresentation("UofTHacks",json["names"][0])
 
     # delete first slide
     credentials_file = 'credentials.json'
@@ -309,9 +271,6 @@ def create_slideshow(json,topic):
     response = (service.presentations().batchUpdate(presentationId=presentation_id, body=body).execute())
 
 
-    json = {
-        "names": ["Placeholder title","test"],
-        "images": ["https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Gilbert_Stuart_Williamstown_Portrait_of_George_Washington.jpg/1200px-Gilbert_Stuart_Williamstown_Portrait_of_George_Washington.jpg","https://www.varsitytutors.com/images/earlyamerica/washington.jpg"],
-        "descs": [";laskdj;lkasdjf;lkasdjfl;askdjf","Slides about George. Slides about George. Slides about George. Slides about George. Slides about George. Slides about George. "]
-    }
+    
     handleData(json,presentation_id,topic)
+    return f'https://docs.google.com/presentation/d/{presentation_id}/edit'

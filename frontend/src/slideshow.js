@@ -8,6 +8,7 @@ function App() {
   const location = useLocation();
   const data = location.state?.response || {}; // Retrieve the 'response' key, which is the data
 
+  // basically just want to have the flask server call here!!
 
   const [topic, setTopic] = useState([]); // 2-element array: [general topic, user's chosen person]
   const [data1, setPeople] = useState(data);
@@ -32,7 +33,43 @@ function App() {
   }
 
   const [descriptionText, setDescriptionText] = useState(info);
+  const [slidesLink, setSlidesLink] = useState(null); // To store the generated slides link
+  
+  // Function to fetch slides link
+  const fetchSlidesLink = () => {
+    const payload = data;
 
+    fetch('http://127.0.0.1:8030/api/exportSlides', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log('Success:', data);
+        setSlidesLink(data.slides_link); // Update the state with the new slides link
+      })
+      .catch((error) => {
+        console.error("Error fetching slides link:", error);
+      });
+  };
+
+  // Run fetchSlidesLink only once when the component mounts
+  useEffect(() => {
+    fetchSlidesLink(); // Call the function to fetch slides link
+  }, []); // Empty dependency array ensures this runs only once on mount
+
+
+
+
+  
 
   const appendString = (newString) => {
     switch (currentPerson) {
@@ -56,34 +93,34 @@ function App() {
 
 
 
-  const sendDataToBackend = () => {
-    if (topic.length < 2) {
-      console.error("Topic array does not have enough elements.");
-      return;
-    }
+  // const sendDataToBackend = () => {
+  //   if (topic.length < 2) {
+  //     console.error("Topic array does not have enough elements.");
+  //     return;
+  //   }
 
-    const user_topic = topic[0]; // The general topic
-    const user_question = topic[1]; // The user's chosen input
+  //   const user_topic = topic[0]; // The general topic
+  //   const user_question = topic[1]; // The user's chosen input
 
-    fetch("http://localhost:5000/api/chatbot", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_topic: user_topic,
-        user_question: user_question,
-        past_response: "", // Initial value; not used here
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Response from backend:", data.response);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  };
+  //   fetch("http://localhost:5000/api/chatbot", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({
+  //       user_topic: user_topic,
+  //       user_question: user_question,
+  //       past_response: "", // Initial value; not used here
+  //     }),
+  //   })
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       console.log("Response from backend:", data.response);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error:", error);
+  //     });
+  // };
 
   const updatePastResponse = () => {
     let past_response = "";
@@ -107,24 +144,24 @@ function App() {
         
     }
 
-    fetch("http://localhost:5000/api/chatbot", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_topic: topic[0],
-        user_question: topic[1],
-        past_response: past_response,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Updated past_response response from backend:", data.response);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+    // fetch("http://localhost:5000/api/chatbot", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({
+    //     user_topic: topic[0],
+    //     user_question: topic[1],
+    //     past_response: past_response,
+    //   }),
+    // })
+    //   .then((response) => response.json())
+    //   .then((data) => {
+    //     console.log("Updated past_response response from backend:", data.response);
+    //   })
+    //   .catch((error) => {
+    //     console.error("Error:", error);
+    //   });
   };
 
   const handleClick = (option) => {
@@ -183,17 +220,30 @@ function App() {
   return (
     <div className="container">
       <div className="header">
-        <div className="topic">
-          <p>Chosen Topic</p>
-          <p>{relationshipText}</p>
+        <div className="slides-section">
+          {slidesLink ? (
+            <div className="slides-link-container">
+              <a>Here is your slideshow link: </a>
+              <a href={slidesLink} target="_blank" rel="noopener noreferrer">
+                View Slideshow
+              </a>
+              <p className="relationship-text">{relationshipText}</p>
+
+            </div>
+          ) : (
+            <p>{/* Fallback while waiting for the link */}Loading slideshow link...</p>
+          )}
+        </div>
+        <div className="relationship-section">
         </div>
       </div>
-
+  
       <div className="middle-area">
         <div className="image-placeholder">
           <img src={imageSrc} alt="Topic" width="80%" />
         </div>
-
+  
+  
         <div className="grey-square">
           <div className="chat-container">
             <div className="message-log">
@@ -211,7 +261,7 @@ function App() {
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Type your message..."
+              placeholder="Future implementation..."
               className="text-input"
             />
             <button onClick={handleSendClick} className="send-button">
@@ -220,7 +270,7 @@ function App() {
           </div>
         </div>
       </div>
-
+  
       <div className="navigation">
         <button className="nav-button" onClick={handlePrevious}>←</button>
         <button className="back-button" onClick={handleBack}>Back</button>
@@ -228,6 +278,6 @@ function App() {
       </div>
     </div>
   );
-}
+  }
 
 export default App;

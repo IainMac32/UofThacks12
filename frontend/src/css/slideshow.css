@@ -10,10 +10,10 @@
 }
 
 .header {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    margin-bottom: 20px;
+  display: flex;
+  justify-content: flex-start;  /* Align content to the left */
+  align-items: center;          /* Vertically align if necessary */
+  width: 100%;
 }
 
 .topic {
@@ -250,4 +250,8 @@
 .back-button:hover{
     background-color: rgb(166, 247, 84);
     transform: scale(1.1);
+}
+
+.relationship-text{
+  font-size: 20px;
 }
