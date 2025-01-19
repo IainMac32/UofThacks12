@@ -315,6 +315,7 @@ def create_slideshow(json,topic):
         "images": ["https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Gilbert_Stuart_Williamstown_Portrait_of_George_Washington.jpg/1200px-Gilbert_Stuart_Williamstown_Portrait_of_George_Washington.jpg","https://www.varsitytutors.com/images/earlyamerica/washington.jpg"],
         "descs": [";laskdj;lkasdjf;lkasdjfl;askdjf","Slides about George. Slides about George. Slides about George. Slides about George. Slides about George. Slides about George. "]
     }
+
     handleData(json,presentation_id,topic)
 
 
