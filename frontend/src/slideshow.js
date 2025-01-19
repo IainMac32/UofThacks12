@@ -1,25 +1,62 @@
 import "./css/slideshow.css";
-import { useNavigate } from "react-router-dom";
-import { useState, useRef, useEffect } from "react";
-
+import { useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 function App() {
   const navigate = useNavigate();
+  
+  const location = useLocation();
+  const data = location.state?.response || {}; // Retrieve the 'response' key, which is the data
+
 
   const [topic, setTopic] = useState([]); // 2-element array: [general topic, user's chosen person]
-  const [people, setPeople] = useState({ names: [], descs: [], images: [] }); // Related people info
-  const [info0, setInfo0] = useState([]); // Info and text log for one person
-  const [info1, setInfo1] = useState([]); // Info and text log for one person
-  const [info2, setInfo2] = useState([]); // Info and text log for one person
-  const [info3, setInfo3] = useState([]); // Info and text log for one person
+  const [data1, setPeople] = useState(data);
+  const [info0, setInfo0] = useState([data1.descs[0]]); // Separate elements in the array
+  const [info1, setInfo1] = useState([data1.descs[1]]); // Info and text log for one person
+  const [info2, setInfo2] = useState([data1.descs[2]]); // Info and text log for one person
+  const [info3, setInfo3] = useState([data1.descs[3]]); // Info and text log for one person
   const [currentPerson, setCurrentPerson] = useState(0); // Integer indicating the current person
 
-  const [imageSrc, setImageSrc] = useState('https://via.placeholder.com/150'); // Placeholder image
-  const [relationshipText, setRelationshipText] = useState('I am ___ I am related to this event/topic this way: ___');
-  const [descriptionText, setDescriptionText] = useState('Initial description goes here.');
+  const [imageSrc, setImageSrc] = useState(data1.images[currentPerson]); // Placeholder image
+  const [relationshipText, setRelationshipText] = useState("I am " + data1.names[currentPerson]);
+
+  let info
+  if (currentPerson === 0) {
+    info = info0;
+  } else if (currentPerson === 1) {
+    info = info1;
+  } else if (currentPerson === 2) {
+    info = info2;
+  } else if (currentPerson === 3) {
+    info = info3;
+  }
+
+  const [descriptionText, setDescriptionText] = useState(info);
+
+
+  const appendString = (newString) => {
+    switch (currentPerson) {
+      case 0:
+        setInfo0([...info0, newString]);
+        break;
+      case 1:
+        setInfo1([...info1, newString]);
+        break;
+      case 2:
+        setInfo2([...info2, newString]);
+        break;
+      case 3:
+        setInfo3([...info3, newString]);
+        break;
+      default:
+        console.error("Invalid person index");
+    }
+  };
+
+
+
 
   const sendDataToBackend = () => {
-    // Ensure the topic array has at least 2 elements
     if (topic.length < 2) {
       console.error("Topic array does not have enough elements.");
       return;
@@ -28,7 +65,6 @@ function App() {
     const user_topic = topic[0]; // The general topic
     const user_question = topic[1]; // The user's chosen input
 
-    // Send data to the backend
     fetch("http://localhost:5000/api/chatbot", {
       method: "POST",
       headers: {
@@ -50,11 +86,11 @@ function App() {
   };
 
   const updatePastResponse = () => {
-    // Decide which past_response to send based on currentPerson
     let past_response = "";
     switch (currentPerson) {
       case 0:
         past_response = info0.join(" ");
+        
         break;
       case 1:
         past_response = info1.join(" ");
@@ -68,18 +104,18 @@ function App() {
       default:
         console.error("Invalid currentPerson value");
         return;
+        
     }
 
-    // Send the past_response to the backend
     fetch("http://localhost:5000/api/chatbot", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user_topic: topic[0], // Send the current topic
-        user_question: topic[1], // Send the current question
-        past_response: past_response, // Send the selected past response
+        user_topic: topic[0],
+        user_question: topic[1],
+        past_response: past_response,
       }),
     })
       .then((response) => response.json())
@@ -98,41 +134,51 @@ function App() {
   const handleBack = () => {
     navigate("/about");
   };
-  // Placeholder functions to simulate arrow clicks and updates
+
   const handlePrevious = () => {
-    // Update the state for the previous item
-    setImageSrc('https://via.placeholder.com/150'); // Example new image
-    setRelationshipText('Updated relationship text for previous');
-    setDescriptionText('Updated description for previous.');
+    setCurrentPerson((prevPerson) => {
+      const prevPersonIndex = (prevPerson - 1 + data1.names.length) % data1.names.length;
+      setDescriptionText(data1.descs[prevPersonIndex]);
+      setImageSrc(data1.images[prevPersonIndex]);
+      setRelationshipText(`I am ${data1.names[prevPersonIndex]}`);
+      
+      // Update messages with previous description
+      setMessages((prevMessages) => [data1.descs[prevPersonIndex]]);
+
+      return prevPersonIndex;
+    });
   };
 
   const handleNext = () => {
-      // Update the state for the next item
-      setImageSrc('https://via.placeholder.com/150'); // new image
-      setRelationshipText('Updated relationship text for next');
-      setDescriptionText('Updated description for next.');
+    setCurrentPerson((prevPerson) => {
+      const nextPerson = (prevPerson + 1) % data1.names.length;
+      setDescriptionText(data1.descs[nextPerson]);
+      setImageSrc(data1.images[nextPerson]);
+      setRelationshipText(`I am ${data1.names[nextPerson]}`);
+
+      // Update messages with next description
+      setMessages((prevMessages) => [data1.descs[nextPerson]]);
+      
+      return nextPerson;
+    });
   };
 
-const [messages, setMessages] = useState([
-    "Description, jdjjdjjdjjjdjjjdjjdnfkjnfjkerfernkjdsnkdlsfnkfwksjdnf. What more would you like to know?", // index 0 - response
-    "w",
-    "2",
-    "2",
-    "2",
-    "2",
-    "2",
-    "2",
-    "2",
-    "2",
-    "2"
-]);
-  
-const [inputValue, setInputValue] = useState('');
+  const [messages, setMessages] = useState([
+    descriptionText, // index 0 - response
+  ]);
 
-const handleSendClick = () => {
-  console.log(inputValue); // You can handle the input value here (e.g., send it to a server)
-  setInputValue(''); // Clear the input field
-};
+  const [inputValue, setInputValue] = useState('');
+
+  const handleSendClick = () => {
+    console.log(inputValue);
+    // Add inputValue to the messages list, keeping previous messages intact
+  
+    appendString(inputValue);
+
+    // Clear the input field
+    setInputValue('');
+
+  };
 
   return (
     <div className="container">
@@ -145,7 +191,7 @@ const handleSendClick = () => {
 
       <div className="middle-area">
         <div className="image-placeholder">
-          <img src={imageSrc} alt="Topic" width="100%" />
+          <img src={imageSrc} alt="Topic" width="80%" />
         </div>
 
         <div className="grey-square">
@@ -160,7 +206,7 @@ const handleSendClick = () => {
               ))}
             </div>
           </div>
-          < div className="text-input-container">
+          <div className="text-input-container">
             <input
               type="text"
               value={inputValue}
@@ -173,15 +219,15 @@ const handleSendClick = () => {
             </button>
           </div>
         </div>
-
       </div>
+
       <div className="navigation">
         <button className="nav-button" onClick={handlePrevious}>←</button>
         <button className="back-button" onClick={handleBack}>Back</button>
         <button className="nav-button" onClick={handleNext}>→</button>
       </div>
     </div>
-    );
+  );
 }
 
 export default App;

@@ -28,16 +28,17 @@
     flex: 9;
 }
 .image-placeholder {
-    flex: 1;
+    flex: 30%;
     height: 400px;
     width: 200px;
-    background-color: #ccc;
+    background-color: antiquewhite;
     margin-left: 10px;
     margin-right: 20px;
     border-radius: 10px;
 }
 
 .grey-square {
+    flex: 40%;
     background-color: rgb(158, 157, 157);
     width: 50%;
     height: 100%;

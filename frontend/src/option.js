@@ -11,9 +11,51 @@ function App(){
     const handleChange = (event) => {
         setText(event.target.value);
       };
+
+
+
+
+
+
+
+
     const handleClick = (textInput) => {
-        navigate("/slideshow", { state: { query: textInput } });
-      }
+        const payload = { topic: textInput }; // Create the payload
+
+        fetch('https://flask-app-i7sgeivnqa-uc.a.run.app/api/getPerspectives', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then((data) => {
+                console.log('Success:', data);
+                // Use the response data to navigate or update your UI
+                navigate("/slideshow", { state: { response: data } });
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    };
+
+
+
+
+
+
+
+
+
+
+
+
     //Use API to replace this data
     const data=[
         {id:"1", question:"Question #1", link:"https://example.com"},
