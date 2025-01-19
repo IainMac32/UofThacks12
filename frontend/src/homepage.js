@@ -48,7 +48,7 @@ function App() {
         newTitle = "Culture";
         break;
       default:
-        newTitle = "Perspectify";
+        newTitle = "Learning Lens";
     }
     setTitle(newTitle);
     navigate("/about", { state: { title: newTitle } });
@@ -75,10 +75,10 @@ function App() {
       ></div>
       <div className="app">
         <div className="title">
-          <h1>Perspectify</h1>
+          <h1>Learning Lens</h1>
         </div>
         <div className="slogan">
-          <p>"Learning through the perspectives of others"</p>
+          <p>"Seeing the world through the eyes of others."</p>
         </div>
         <div className="grid-container">
           <div className="row">

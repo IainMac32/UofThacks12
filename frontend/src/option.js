@@ -74,7 +74,7 @@ function App(){
     return(
         <div className='option-page'>
             <div className="option-title">
-                <h1>Perspectify</h1>
+                <h1>Learning Lens</h1>
             </div>
             <div className='option-question'>
                 <h3>What would you like to know about {title}?</h3>
