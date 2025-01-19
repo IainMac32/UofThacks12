@@ -36,23 +36,23 @@ def submit_perspectives():
 
 
 
-@app.route("/api/chatbot", methods=["POST"])
-def chatbot_route():
-    data = request.json
-    user_question = data.get("user_question")
-    user_topic = data.get("user_topic")
-    past_response = data.get("past_response")
+# @app.route("/api/chatbot", methods=["POST"])
+# def chatbot_route():
+#     data = request.json
+#     user_question = data.get("user_question")
+#     user_topic = data.get("user_topic")
+#     past_response = data.get("past_response")
 
-    # Validate input
-    if not user_question or not user_topic or past_response is None:
-        return jsonify({"error": "Missing required parameters"}), 400
+#     # Validate input
+#     if not user_question or not user_topic or past_response is None:
+#         return jsonify({"error": "Missing required parameters"}), 400
 
-    # Call the get_chatbot method
-    response = get_chatbot(user_question, user_topic, past_response)
-    print(response)
+#     # Call the get_chatbot method
+#     response = get_chatbot(user_question, user_topic, past_response)
+#     print(response)
 
-    # Return the chatbot response
-    return jsonify({"response": response})
+#     # Return the chatbot response
+#     return jsonify({"response": response})
 
 
 import time
@@ -63,7 +63,7 @@ def export_route():
     # 1. Get all titles, images, and the chat log for each
     data = request.json
 
-    max_retries = 4
+    max_retries = 3
     attempt = 0
     link = None
 
@@ -76,7 +76,7 @@ def export_route():
         except Exception as e:
             attempt += 1
             print(f"Error creating slideshow: {e}. Retrying {attempt}/{max_retries}...")
-            time.sleep(2)  # Wait 2 seconds before retrying
+            time.sleep(3)  # Wait 2 seconds before retrying
 
     if link is None:
         return jsonify({"error": "Failed to create slideshow after multiple attempts"}), 500

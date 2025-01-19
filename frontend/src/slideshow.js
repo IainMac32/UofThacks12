@@ -34,10 +34,14 @@ function App() {
 
   const [descriptionText, setDescriptionText] = useState(info);
   const [slidesLink, setSlidesLink] = useState(null); // To store the generated slides link
-  
+  const [loading, setLoading] = useState(false); // To track the loading state
+
   // Function to fetch slides link
   const fetchSlidesLink = () => {
     const payload = data;
+
+    // Set loading to true when the request starts
+    setLoading(true);
 
     fetch('http://127.0.0.1:8030/api/exportSlides', {
       method: 'POST',
@@ -58,6 +62,9 @@ function App() {
       })
       .catch((error) => {
         console.error("Error fetching slides link:", error);
+      })
+      .finally(() => {
+        setLoading(false); // Set loading to false when the request is done
       });
   };
 

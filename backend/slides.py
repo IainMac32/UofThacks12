@@ -5,6 +5,14 @@ import uuid
 import webbrowser
 from pyspark.sql import SparkSession
 
+import ssl
+import requests
+
+
+
+
+
+
 # Path to your service account key file
 SERVICE_ACCOUNT_FILE = "./credentials.json"
 
